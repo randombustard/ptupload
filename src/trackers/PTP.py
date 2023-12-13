@@ -14,86 +14,80 @@ import platform
 import pickle
 from pymediainfo import MediaInfo
 
-
 from src.trackers.COMMON import COMMON
 from src.bbcode import BBCODE
-from src.exceptions import *
+from src.exceptions import LoginException, UploadException
 from src.console import console
 
 
-
 class PTP():
-
     def __init__(self, config):
         self.config = config
         self.tracker = 'PTP'
         self.source_flag = 'PTP'
         self.api_user = config['TRACKERS']['PTP'].get('ApiUser', '').strip()
         self.api_key = config['TRACKERS']['PTP'].get('ApiKey', '').strip()
-        self.announce_url = config['TRACKERS']['PTP'].get('announce_url', '').strip() 
-        self.username = config['TRACKERS']['PTP'].get('username', '').strip() 
+        self.announce_url = config['TRACKERS']['PTP'].get('announce_url', '').strip()
+        self.username = config['TRACKERS']['PTP'].get('username', '').strip()
         self.password = config['TRACKERS']['PTP'].get('password', '').strip()
-        self.web_source = distutils.util.strtobool(str(config['TRACKERS']['PTP'].get('add_web_source_to_desc', True))) 
+        self.web_source = distutils.util.strtobool(str(config['TRACKERS']['PTP'].get('add_web_source_to_desc', True)))
         self.user_agent = f'Upload Assistant/2.1 ({platform.system()} {platform.release()})'
         self.banned_groups = ['aXXo', 'BRrip', 'CM8', 'CrEwSaDe', 'CTFOH', 'DNL', 'FaNGDiNG0', 'HD2DVD', 'HDTime', 'ION10', 'iPlanet', 'KiNGDOM', 'mHD', 'mSD', 'nHD', 'nikt0', 'nSD', 'NhaNc3', 'OFT', 'PRODJi', 'SANTi', 'STUTTERSHIT', 'ViSION', 'VXT', 'WAF', 'd3g', 'x0r', 'YIFY', 'BMDru']
-    
+
         self.sub_lang_map = {
-            ("Arabic", "ara", "ar") : 22,
-            ("Brazilian Portuguese", "Brazilian", "Portuguese-BR", 'pt-br') : 49,
-            ("Bulgarian", "bul", "bg") : 29,
-            ("Chinese", "chi", "zh", "Chinese (Simplified)", "Chinese (Traditional)") : 14,
-            ("Croatian", "hrv", "hr", "scr") : 23,
-            ("Czech", "cze", "cz", "cs") : 30,
-            ("Danish", "dan", "da") : 10,
-            ("Dutch", "dut", "nl") : 9,
-            ("English", "eng", "en", "English (CC)", "English - SDH") : 3,
-            ("English - Forced", "English (Forced)", "en (Forced)") : 50,
-            ("English Intertitles", "English (Intertitles)", "English - Intertitles", "en (Intertitles)") : 51,
-            ("Estonian", "est", "et") : 38,
-            ("Finnish", "fin", "fi") : 15,
-            ("French", "fre", "fr") : 5,
-            ("German", "ger", "de") : 6,
-            ("Greek", "gre", "el") : 26,
-            ("Hebrew", "heb", "he") : 40,
-            ("Hindi" "hin", "hi") : 41,
-            ("Hungarian", "hun", "hu") : 24,
-            ("Icelandic", "ice", "is") : 28,
-            ("Indonesian", "ind", "id") : 47,
-            ("Italian", "ita", "it") : 16,
-            ("Japanese", "jpn", "ja") : 8,
-            ("Korean", "kor", "ko") : 19,
-            ("Latvian", "lav", "lv") : 37,
-            ("Lithuanian", "lit", "lt") : 39,
-            ("Norwegian", "nor", "no") : 12,
-            ("Persian", "fa", "far") : 52,
-            ("Polish", "pol", "pl") : 17,
-            ("Portuguese", "por", "pt") : 21,
-            ("Romanian", "rum", "ro") : 13,
-            ("Russian", "rus", "ru") : 7,
-            ("Serbian", "srp", "sr", "scc") : 31,
-            ("Slovak", "slo", "sk") : 42,
-            ("Slovenian", "slv", "sl") : 43,
-            ("Spanish", "spa", "es") : 4,
-            ("Swedish", "swe", "sv") : 11,
-            ("Thai", "tha", "th") : 20,
-            ("Turkish", "tur", "tr") : 18,
-            ("Ukrainian", "ukr", "uk") : 34,
-            ("Vietnamese", "vie", "vi") : 25,
+            ("Arabic", "ara", "ar"): 22,
+            ("Brazilian Portuguese", "Brazilian", "Portuguese-BR", 'pt-br'): 49,
+            ("Bulgarian", "bul", "bg"): 29,
+            ("Chinese", "chi", "zh", "Chinese (Simplified)", "Chinese (Traditional)"): 14,
+            ("Croatian", "hrv", "hr", "scr"): 23,
+            ("Czech", "cze", "cz", "cs"): 30,
+            ("Danish", "dan", "da"): 10,
+            ("Dutch", "dut", "nl"): 9,
+            ("English", "eng", "en", "English (CC)", "English - SDH"): 3,
+            ("English - Forced", "English (Forced)", "en (Forced)"): 50,
+            ("English Intertitles", "English (Intertitles)", "English - Intertitles", "en (Intertitles)"): 51,
+            ("Estonian", "est", "et"): 38,
+            ("Finnish", "fin", "fi"): 15,
+            ("French", "fre", "fr"): 5,
+            ("German", "ger", "de"): 6,
+            ("Greek", "gre", "el"): 26,
+            ("Hebrew", "heb", "he"): 40,
+            ("Hindi" "hin", "hi"): 41,
+            ("Hungarian", "hun", "hu"): 24,
+            ("Icelandic", "ice", "is"): 28,
+            ("Indonesian", "ind", "id"): 47,
+            ("Italian", "ita", "it"): 16,
+            ("Japanese", "jpn", "ja"): 8,
+            ("Korean", "kor", "ko"): 19,
+            ("Latvian", "lav", "lv"): 37,
+            ("Lithuanian", "lit", "lt"): 39,
+            ("Norwegian", "nor", "no"): 12,
+            ("Persian", "fa", "far"): 52,
+            ("Polish", "pol", "pl"): 17,
+            ("Portuguese", "por", "pt"): 21,
+            ("Romanian", "rum", "ro"): 13,
+            ("Russian", "rus", "ru"): 7,
+            ("Serbian", "srp", "sr", "scc"): 31,
+            ("Slovak", "slo", "sk"): 42,
+            ("Slovenian", "slv", "sl"): 43,
+            ("Spanish", "spa", "es"): 4,
+            ("Swedish", "swe", "sv"): 11,
+            ("Thai", "tha", "th"): 20,
+            ("Turkish", "tur", "tr"): 18,
+            ("Ukrainian", "ukr", "uk"): 34,
+            ("Vietnamese", "vie", "vi"): 25,
         }
-
-
-
 
     async def get_ptp_id_imdb(self, search_term, search_file_folder):
         imdb_id = ptp_torrent_id = None
         filename = str(os.path.basename(search_term))
         params = {
-            'filelist' : filename
+            'filelist': filename
         }
         headers = {
-            'ApiUser' : self.api_user,
-            'ApiKey' : self.api_key,
-            'User-Agent' : self.user_agent
+            'ApiUser': self.api_user,
+            'ApiKey': self.api_key,
+            'User-Agent': self.user_agent
         }
         url = 'https://passthepopcorn.me/torrents.php'
         response = requests.get(url, params=params, headers=headers)
@@ -136,15 +130,15 @@ class PTP():
             pass
         console.print(f'[yellow]Could not find any release matching [bold yellow]{filename}[/bold yellow] on PTP')
         return None, None, None
-    
+
     async def get_imdb_from_torrent_id(self, ptp_torrent_id):
         params = {
-            'torrentid' : ptp_torrent_id
+            'torrentid': ptp_torrent_id
         }
         headers = {
-            'ApiUser' : self.api_user,
-            'ApiKey' : self.api_key,
-            'User-Agent' : self.user_agent
+            'ApiUser': self.api_user,
+            'ApiKey': self.api_key,
+            'User-Agent': self.user_agent
         }
         url = 'https://passthepopcorn.me/torrents.php'
         response = requests.get(url, params=params, headers=headers)
@@ -167,16 +161,16 @@ class PTP():
                 return None, None
         except Exception:
             return None, None
-    
+
     async def get_ptp_description(self, ptp_torrent_id, is_disc):
         params = {
-            'id' : ptp_torrent_id,
-            'action' : 'get_description'
+            'id': ptp_torrent_id,
+            'action': 'get_description'
         }
         headers = {
-            'ApiUser' : self.api_user,
-            'ApiKey' : self.api_key,
-            'User-Agent' : self.user_agent
+            'ApiUser': self.api_user,
+            'ApiKey': self.api_key,
+            'User-Agent': self.user_agent
         }
         url = 'https://passthepopcorn.me/torrents.php'
         response = requests.get(url, params=params, headers=headers)
@@ -186,26 +180,25 @@ class PTP():
         desc = bbcode.clean_ptp_description(ptp_desc, is_disc)
         console.print(f"[bold green]Successfully grabbed description from PTP")
         return desc
-    
 
 
     async def get_group_by_imdb(self, imdb):
         params = {
-            'imdb' : imdb,
+            'imdb': imdb,
         }
         headers = {
-            'ApiUser' : self.api_user,
-            'ApiKey' : self.api_key,
-            'User-Agent' : self.user_agent
+            'ApiUser': self.api_user,
+            'ApiKey': self.api_key,
+            'User-Agent': self.user_agent
         }
         url = 'https://passthepopcorn.me/torrents.php'
         response = requests.get(url=url, headers=headers, params=params)
         await asyncio.sleep(1)
         try:
             response = response.json()
-            if response.get("Page") == "Browse": # No Releases on Site with ID
+            if response.get("Page") == "Browse":  # No Releases on Site with ID
                 return None
-            elif response.get('Page') == "Details": # Group Found
+            elif response.get('Page') == "Details":  # Group Found
                 groupID = response.get('GroupId')
                 console.print(f"[green]Matched IMDb: [yellow]tt{imdb}[/yellow] to Group ID: [yellow]{groupID}[/yellow][/green]")
                 console.print(f"[green]Title: [yellow]{response.get('Name')}[/yellow] ([yellow]{response.get('Year')}[/yellow])")
@@ -215,17 +208,16 @@ class PTP():
             console.print("[red]Please check that the site is online and your ApiUser/ApiKey values are correct")
             return None
 
-
     async def get_torrent_info(self, imdb, meta):
         params = {
-            'imdb' : imdb,
-            'action' : 'torrent_info',
-            'fast' : 1
+            'imdb': imdb,
+            'action': 'torrent_info',
+            'fast': 1
         }
         headers = {
-            'ApiUser' : self.api_user,
-            'ApiKey' : self.api_key,
-            'User-Agent' : self.user_agent
+            'ApiUser': self.api_user,
+            'ApiKey': self.api_key,
+            'User-Agent': self.user_agent
         }
         url = "https://passthepopcorn.me/ajax.php"
         response = requests.get(url=url, params=params, headers=headers)
@@ -246,9 +238,9 @@ class PTP():
 
     async def get_torrent_info_tmdb(self, meta):
         tinfo = {
-            "title" : meta.get("title", ""),
-            "year" : meta.get("year", ""),
-            "album_desc" : meta.get("overview", ""),
+            "title": meta.get("title", ""),
+            "year": meta.get("year", ""),
+            "album_desc": meta.get("overview", ""),
         }
         tags = await self.get_tags([meta.get("genres", ""), meta.get("keywords", "")])
         tinfo['tags'] = ", ".join(tags)
@@ -272,21 +264,20 @@ class PTP():
     async def search_existing(self, groupID, meta):
         # Map resolutions to SD / HD / UHD
         quality = None
-        if meta.get('sd', 0) == 1: # 1 is SD
+        if meta.get('sd', 0) == 1:  # 1 is SD
             quality = "Standard Definition"
         elif meta['resolution'] in ["1440p", "1080p", "1080i", "720p"]:
             quality = "High Definition"
         elif meta['resolution'] in ["2160p", "4320p", "8640p"]:
             quality = "Ultra High Definition"
-        
 
         params = {
-            'id' : groupID,
+            'id': groupID,
         }
         headers = {
-            'ApiUser' : self.api_user,
-            'ApiKey' : self.api_key,
-            'User-Agent' : self.user_agent
+            'ApiUser': self.api_user,
+            'ApiKey': self.api_key,
+            'User-Agent': self.user_agent
         }
         url = 'https://passthepopcorn.me/torrents.php'
         response = requests.get(url=url, headers=headers, params=params)
@@ -303,12 +294,11 @@ class PTP():
             console.print("[red]An error has occured trying to find existing releases")
         return existing
 
-
     async def ptpimg_url_rehost(self, image_url):
         payload = {
-            'format' : 'json',
-            'api_key' : self.config["DEFAULT"]["ptpimg_api"],
-            'link-upload' : image_url
+            'format': 'json',
+            'api_key': self.config["DEFAULT"]["ptpimg_api"],
+            'link-upload': image_url
         }
         headers = { 'referer': 'https://ptpimg.me/index.php'}
         url = "https://ptpimg.me/upload.php"
@@ -319,12 +309,11 @@ class PTP():
             ptpimg_code = response[0]['code']
             ptpimg_ext = response[0]['ext']
             img_url = f"https://ptpimg.me/{ptpimg_code}.{ptpimg_ext}"
-        except:
+        except Exception:
             console.print("[red]PTPIMG image rehost failed")
             img_url = image_url
             # img_url = ptpimg_upload(image_url, ptpimg_api)
         return img_url
-
 
     def get_type(self, imdb_info, meta):
         ptpType = None
@@ -359,7 +348,7 @@ class PTP():
                 ptpType = "Stand-up Comedy"
             elif "concert" in keywords:
                 ptpType = "Concert"
-        if ptpType == None:
+        if ptpType is None:
             if meta.get('mode', 'discord') == 'cli':
                 ptpTypeList = ["Feature Film", "Short Film", "Miniseries", "Stand-up Comedy", "Concert", "Movie Collection"]
                 ptpType = cli_ui.ask_choice("Select the proper type", choices=ptpTypeList)
@@ -380,10 +369,10 @@ class PTP():
                 codec = "DVD9"
         else:
             codecmap = {
-                "AVC" : "H.264",
-                "H.264" : "H.264",
-                "HEVC" : "H.265",
-                "H.265" : "H.265",
+                "AVC": "H.264",
+                "H.264": "H.264",
+                "HEVC": "H.265",
+                "H.265": "H.265",
             }
             searchcodec = meta.get('video_codec', meta.get('video_encode'))
             codec = codecmap.get(searchcodec, searchcodec)
@@ -411,28 +400,26 @@ class PTP():
         else:
             ext = os.path.splitext(meta['filelist'][0])[1]
             containermap = {
-                '.mkv' : "MKV",
-                '.mp4' : 'MP4'
+                '.mkv': "MKV",
+                '.mp4': 'MP4'
             }
             container = containermap.get(ext, 'Other')
         return container
 
-
     def get_source(self, source):
         sources = {
-            "Blu-ray" : "Blu-ray",
-            "BluRay" : "Blu-ray",
-            "HD DVD" : "HD-DVD",
-            "HDDVD" : "HD-DVD",
-            "Web" : "WEB",
-            "HDTV" : "HDTV",
-            'UHDTV' : 'HDTV',
-            "NTSC" : "DVD",
-            "PAL" : "DVD"
+            "Blu-ray": "Blu-ray",
+            "BluRay": "Blu-ray",
+            "HD DVD": "HD-DVD",
+            "HDDVD": "HD-DVD",
+            "Web": "WEB",
+            "HDTV": "HDTV",
+            'UHDTV': 'HDTV',
+            "NTSC": "DVD",
+            "PAL": "DVD"
         }
         source_id = sources.get(source, "OtherR")
         return source_id
-
 
     def get_subtitles(self, meta):
         sub_lang_map = self.sub_lang_map
@@ -458,29 +445,29 @@ class PTP():
                 for lang, subID in sub_lang_map.items():
                     if language in lang and subID not in sub_langs:
                         sub_langs.append(subID)
-        
+
         if sub_langs == []:
-            sub_langs = [44] # No Subtitle
+            sub_langs = [44]  # No Subtitle
         return sub_langs
 
     def get_trumpable(self, sub_langs):
         trumpable_values = {
-            "English Hardcoded Subs (Full)" : 4,
-            "English Hardcoded Subs (Forced)" : 50,
-            "No English Subs" : 14,
-            "English Softsubs Exist (Mislabeled)" : None,
-            "Hardcoded Subs (Non-English)" : "OTHER"
+            "English Hardcoded Subs (Full)": 4,
+            "English Hardcoded Subs (Forced)": 50,
+            "No English Subs": 14,
+            "English Softsubs Exist (Mislabeled)": None,
+            "Hardcoded Subs (Non-English)": "OTHER"
         }
         opts = cli_ui.select_choices("English subtitles not found. Please select any/all applicable options:", choices=list(trumpable_values.keys()))
         trumpable = []
         if opts:
             for t, v in trumpable_values.items():
                 if t in ''.join(opts):
-                    if v == None:
+                    if v is None:
                         break
-                    elif v != 50: # Hardcoded, Forced
+                    elif v != 50:  # Hardcoded, Forced
                         trumpable.append(v)
-                    elif v == "OTHER": #Hardcoded, Non-English
+                    elif v == "OTHER":  # Hardcoded, Non-English
                         trumpable.append(14)
                         hc_sub_langs = cli_ui.ask_string("Enter language code for HC Subtitle languages")
                         for lang, subID in self.sub_lang_map.items():
@@ -489,7 +476,7 @@ class PTP():
                     else:
                         sub_langs.append(v)
                         trumpable.append(4)
-        
+
         sub_langs = list(set(sub_langs))
         trumpable = list(set(trumpable))
         if trumpable == []:
@@ -506,7 +493,7 @@ class PTP():
             remaster_title.append('The Criterion Collection')
         elif meta.get('distributor') in ('MASTERS OF CINEMA', 'MOC'):
             remaster_title.append('Masters of Cinema')
-        
+
         # Editions
         # Director's Cut, Extended Edition, Rifftrax, Theatrical Cut, Uncut, Unrated
         if "director's cut" in meta.get('edition', '').lower():
@@ -527,7 +514,7 @@ class PTP():
 
         # Features
         # 2-Disc Set, 2in1, 2D/3D Edition, 3D Anaglyph, 3D Full SBS, 3D Half OU, 3D Half SBS,
-        # 4K Restoration, 4K Remaster, 
+        # 4K Restoration, 4K Remaster,
         # Extras, Remux,
         if meta.get('type') == "REMUX":
             remaster_title.append("Remux")
@@ -541,11 +528,10 @@ class PTP():
             remaster_title.append('Dual Audio')
         if "Dubbed" in meta['audio']:
             remaster_title.append('English Dub')
-        if meta.get('has_commentary', False) == True:
+        if meta.get('has_commentary', False) is True:
             remaster_title.append('With Commentary')
 
-
-        # HDR10, HDR10+, Dolby Vision, 10-bit, 
+        # HDR10, HDR10+, Dolby Vision, 10-bit,
         # if "Hi10P" in meta.get('video_encode', ''):
         #     remaster_title.append('10-bit')
         if meta.get('hdr', '').strip() == '' and meta.get('bit_depth') == '10':
@@ -604,7 +590,7 @@ class PTP():
                             while ds.is_alive() == True:
                                 await asyncio.sleep(1)
                             new_screens = glob.glob1(f"{meta['base_dir']}/tmp/{meta['uuid']}",f"FILE_{i}-*.png")
-                            images, dummy = prep.upload_screens(meta, 2, 1, 0, 2, new_screens, {})   
+                            images, dummy = prep.upload_screens(meta, 2, 1, 0, 2, new_screens, {})
 
                     if each['type'] == "DVD":
                         desc.write(f"[b][size=3]{each['name']}:[/size][/b]\n")
@@ -622,9 +608,9 @@ class PTP():
                             while ds.is_alive() == True:
                                 await asyncio.sleep(1)
                             new_screens = glob.glob1(f"{meta['base_dir']}/tmp/{meta['uuid']}", f"{meta['discs'][i]['name']}-*.png")
-                            images, dummy = prep.upload_screens(meta, 2, 1, 0, 2, new_screens, {})  
-                        
-                    if len(images) > 0: 
+                            images, dummy = prep.upload_screens(meta, 2, 1, 0, 2, new_screens, {})
+
+                    if len(images) > 0:
                         for each in range(len(images[:int(meta['screens'])])):
                             raw_url = images[each]['raw_url']
                             desc.write(f"[img]{raw_url}[/img]\n")
@@ -640,7 +626,7 @@ class PTP():
                         mi_dump = open(f"{meta['base_dir']}/tmp/{meta['uuid']}/MEDIAINFO.txt", 'r', encoding='utf-8').read()
                     else:
                         # Export Mediainfo
-                        mi_dump = MediaInfo.parse(file, output="STRING", full=False, mediainfo_options={'inform_version' : '1'})
+                        mi_dump = MediaInfo.parse(file, output="STRING", full=False, mediainfo_options={'inform_version': '1'})
                         # mi_dump = mi_dump.replace(file, os.path.basename(file))
                         with open(f"{meta['base_dir']}/tmp/{meta['uuid']}/TEMP_PTP_MEDIAINFO.txt", "w", newline="", encoding="utf-8") as f:
                             f.write(mi_dump)
@@ -650,7 +636,7 @@ class PTP():
                         s.start()
                         while s.is_alive() == True:
                             await asyncio.sleep(3)
-                        new_screens = glob.glob1(f"{meta['base_dir']}/tmp/{meta['uuid']}",f"FILE_{i}-*.png")
+                        new_screens = glob.glob1(f"{meta['base_dir']}/tmp/{meta['uuid']}", f"FILE_{i}-*.png")
                         images, dummy = prep.upload_screens(meta, 2, 1, 0, 2, new_screens, {})
 
                     desc.write(f"[mediainfo]{mi_dump}[/mediainfo]\n")
@@ -658,14 +644,12 @@ class PTP():
                         base2ptp = self.convert_bbcode(base)
                         if base2ptp.strip() != "":
                             desc.write(base2ptp)
-                            desc.write("\n\n")    
-                    if len(images) > 0: 
+                            desc.write("\n\n")
+                    if len(images) > 0:
                         for each in range(len(images[:int(meta['screens'])])):
                             raw_url = images[each]['raw_url']
                             desc.write(f"[img]{raw_url}[/img]\n")
                     desc.write("\n")
-
-        
 
     async def get_AntiCsrfToken(self, meta):
         if not os.path.exists(f"{meta['base_dir']}/data/cookies"):
@@ -680,7 +664,7 @@ class PTP():
                 loggedIn = await self.validate_login(uploadresponse)
             else:
                 console.print("[yellow]PTP Cookies not found. Creating new session.")
-            if loggedIn == True:
+            if loggedIn is True:
                 AntiCsrfToken = re.search(r'data-AntiCsrfToken="(.*)"', uploadresponse.text).group(1)
             else:
                 passKey = re.match(r"https?://please\.passthepopcorn\.me:?\d*/(.+)/announce",self.announce_url).group(1)
@@ -690,7 +674,7 @@ class PTP():
                     "passkey": passKey,
                     "keeplogged": "1",
                 }
-                headers = {"User-Agent" : self.user_agent}
+                headers = {"User-Agent": self.user_agent}
                 loginresponse = session.post("https://passthepopcorn.me/ajax.php?action=login", data=data, headers=headers)
                 await asyncio.sleep(2)
                 try:
@@ -747,9 +731,9 @@ class PTP():
             "other_source": self.get_source(meta['source']),
             "release_desc": desc,
             "nfo_text": "",
-            "subtitles[]" : ptp_subtitles,
-            "trumpable[]" : ptp_trumpable,
-            "AntiCsrfToken" : await self.get_AntiCsrfToken(meta)
+            "subtitles[]": ptp_subtitles,
+            "trumpable[]": ptp_trumpable,
+            "AntiCsrfToken": await self.get_AntiCsrfToken(meta)
             }
         if data["remaster_year"] != "" or data["remaster_title"] != "":
             data["remaster"] = "on"
@@ -808,11 +792,11 @@ class PTP():
     async def upload(self, meta, url, data):
         with open(f"{meta['base_dir']}/tmp/{meta['uuid']}/[{self.tracker}]{meta['clean_name']}.torrent", 'rb') as torrentFile:
             files = {
-                "file_input" : ("placeholder.torrent", torrentFile, "application/x-bittorent")
+                "file_input": ("placeholder.torrent", torrentFile, "application/x-bittorent")
             }
             headers = {
-                # 'ApiUser' : self.api_user,
-                # 'ApiKey' : self.api_key,
+                # 'ApiUser': self.api_user,
+                # 'ApiKey': self.api_key,
                  "User-Agent": self.user_agent
             }
             if meta['debug']:
@@ -837,7 +821,7 @@ class PTP():
 
                     raise UploadException(f"Upload to PTP failed: {errorMessage} ({response.status_code}). (We are still on the upload page.)")
 
-                
+
                 # URL format in case of successful upload: https://passthepopcorn.me/torrents.php?id=9329&torrentid=91868
                 match = re.match(r".*?passthepopcorn\.me/torrents\.php\?id=(\d+)&torrentid=(\d+)", response.url)
                 if match is None:
@@ -845,4 +829,4 @@ class PTP():
                     console.print(data)
                     raise UploadException(f"Upload to PTP failed: result URL {response.url} ({response.status_code}) is not the expected one.")
 
-        
+

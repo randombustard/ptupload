@@ -12,10 +12,7 @@ import asyncio
 import ssl
 import shutil
 import time
-
-
-from src.console import console 
-
+from src.console import console
 
 
 class Clients():
@@ -25,7 +22,6 @@ class Clients():
     def __init__(self, config):
         self.config = config
         pass
-    
 
     async def add_to_client(self, meta, tracker):
         torrent_path = f"{meta['base_dir']}/tmp/{meta['uuid']}/[{tracker}]{meta['clean_name']}.torrent"
@@ -44,12 +40,12 @@ class Clients():
         if meta.get('client', None) == 'none':
             return
         if default_torrent_client == "none":
-            return 
+            return
         client = self.config['TORRENT_CLIENTS'][default_torrent_client]
         torrent_client = client['torrent_client']
-        
+
         local_path, remote_path = await self.remote_path_map(meta)
-        
+
         console.print(f"[bold green]Adding to {torrent_client}")
         if torrent_client.lower() == "rtorrent":
             self.rtorrent(meta['path'], torrent_path, torrent, meta, local_path, remote_path, client)
@@ -62,8 +58,6 @@ class Clients():
         elif torrent_client.lower() == "watch":
             shutil.copy(torrent_path, client['watch_folder'])
         return
-   
-        
 
     async def find_existing_torrent(self, meta):
         if meta.get('client', None) == None:
@@ -100,9 +94,8 @@ class Clients():
             valid2, torrent_path = await self.is_valid_torrent(meta, torrent_path, torrenthash, torrent_client, print_err=False)
             if valid2:
                 return torrent_path
-        
-        return None
 
+        return None
 
     async def is_valid_torrent(self, meta, torrent_path, torrenthash, torrent_client, print_err=False):
         valid = False
@@ -215,17 +208,6 @@ class Clients():
                     return torrent.hash
         return None
 
-
-
-
-
-
-
-
-
-
-
-
     def rtorrent(self, path, torrent_path, torrent, meta, local_path, remote_path, client):
         rtorrent = xmlrpc.client.Server(client['rtorrent_url'], context=ssl._create_stdlib_context())
         metainfo = bencode.bread(torrent_path)
@@ -234,19 +216,17 @@ class Clients():
         except EnvironmentError as exc:
             console.print("[red]Error making fast-resume data (%s)" % (exc,))
             raise
-        
-            
+
         new_meta = bencode.bencode(fast_resume)
         if new_meta != metainfo:
             fr_file = torrent_path.replace('.torrent', '-resume.torrent')
             console.print("Creating fast resume")
             bencode.bwrite(fast_resume, fr_file)
 
-
         isdir = os.path.isdir(path)
         # if meta['type'] == "DISC":
         #     path = os.path.dirname(path)
-        #Remote path mount
+        # Remote path mount
         modified_fr = False
         if local_path.lower() in path.lower() and local_path.lower() != remote_path.lower():
             path_dir = os.path.dirname(path)
@@ -257,8 +237,8 @@ class Clients():
             modified_fr = True
         if isdir == False:
             path = os.path.dirname(path)
-        
-        
+
+
         console.print("[bold yellow]Adding and starting torrent")
         rtorrent.load.start_verbose('', fr_file, f"d.directory_base.set={path}")
         time.sleep(1)
@@ -275,10 +255,9 @@ class Clients():
             console.print(f"[cyan]Path: {path}")
         return
 
-
     async def qbittorrent(self, path, torrent, local_path, remote_path, client, is_disc, filelist, meta):
         # infohash = torrent.infohash
-        #Remote path mount
+        # Remote path mount
         isdir = os.path.isdir(path)
         if not isdir and len(filelist) == 1:
             path = os.path.dirname(path)
@@ -300,15 +279,15 @@ class Clients():
         am_config = client.get('automatic_management_paths', '')
         if isinstance(am_config, list):
             for each in am_config:
-                if os.path.normpath(each).lower() in os.path.normpath(path).lower(): 
+                if os.path.normpath(each).lower() in os.path.normpath(path).lower():
                     auto_management = True
         else:
-            if os.path.normpath(am_config).lower() in os.path.normpath(path).lower() and am_config.strip() != "": 
+            if os.path.normpath(am_config).lower() in os.path.normpath(path).lower() and am_config.strip() != "":
                 auto_management = True
         qbt_category = client.get("qbit_cat") if not meta.get("qbit_cat") else meta.get('qbit_cat')
 
         content_layout = client.get('content_layout', 'Original')
-        
+
         qbt_client.torrents_add(torrent_files=torrent.dump(), save_path=path, use_auto_torrent_management=auto_management, is_skip_checking=True, content_layout=content_layout, category=qbt_category)
         # Wait for up to 30 seconds for qbit to actually return the download
         # there's an async race conditiion within qbt that it will return ok before the torrent is actually added
@@ -322,7 +301,7 @@ class Clients():
         if meta.get('qbit_tag') != None:
             qbt_client.torrents_add_tags(tags=meta.get('qbit_tag'), torrent_hashes=torrent.infohash)
         console.print(f"Added to: {path}")
-        
+
 
 
     def deluge(self, path, torrent_path, torrent, local_path, remote_path, client, meta):
@@ -330,13 +309,13 @@ class Clients():
         # client = LocalDelugeRPCClient()
         client.connect()
         if client.connected == True:
-            console.print("Connected to Deluge")    
+            console.print("Connected to Deluge")
             isdir = os.path.isdir(path)
             #Remote path mount
             if local_path.lower() in path.lower() and local_path.lower() != remote_path.lower():
                 path = path.replace(local_path, remote_path)
                 path = path.replace(os.sep, '/')
-            
+
             path = os.path.dirname(path)
 
             client.call('core.add_torrent_file', torrent_path, base64.b64encode(torrent.dump()), {'download_location' : path, 'seed_mode' : True})
@@ -405,7 +384,7 @@ class Clients():
                 if os.path.normpath(local_path[i]).lower() in meta['path'].lower():
                     list_local_path = local_path[i]
                     list_remote_path = remote_path[i]
-            
+
         local_path = os.path.normpath(list_local_path)
         remote_path = os.path.normpath(list_remote_path)
         if local_path.endswith(os.sep):

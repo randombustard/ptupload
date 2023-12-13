@@ -15,9 +15,7 @@ class Args():
     def __init__(self, config):
         self.config = config
         pass
-    
 
-     
     def parse(self, args, meta):
         input = args
         parser = argparse.ArgumentParser()
@@ -62,7 +60,7 @@ class Args():
         parser.add_argument('-webdv', '--webdv', action='store_true', required=False, help="Contains a Dolby Vision layer converted using dovi_tool")
         parser.add_argument('-hc', '--hardcoded-subs', action='store_true', required=False, help="Contains hardcoded subs", dest="hardcoded-subs")
         parser.add_argument('-pr', '--personalrelease', action='store_true', required=False, help="Personal Release")
-        parser.add_argument('-sdc','--skip-dupe-check', action='store_true', required=False, help="Pass if you know this is a dupe (Skips dupe check)", dest="dupe")
+        parser.add_argument('-sdc', '--skip-dupe-check', action='store_true', required=False, help="Pass if you know this is a dupe (Skips dupe check)", dest="dupe")
         parser.add_argument('-debug', '--debug', action='store_true', required=False, help="Debug Mode, will run through all the motions providing extra info, but will not upload to trackers.")
         parser.add_argument('-ffdebug', '--ffdebug', action='store_true', required=False, help="Will show info from ffmpeg while taking screenshots.")
         parser.add_argument('-m', '--manual', action='store_true', required=False, help="Manual Mode. Returns link to ddl screens/base.torrent")
@@ -94,7 +92,7 @@ class Args():
                             break
                     else:
                         break
-        
+
         if meta.get('tmdb_manual') != None or meta.get('imdb') != None:
             meta['tmdb_manual'] = meta['imdb'] = None
         for key in args:
@@ -103,7 +101,7 @@ class Args():
                 if isinstance(value, list):
                     value2 = self.list_to_string(value)
                     if key == 'type':
-                        meta[key] = value2.upper().replace('-','')
+                        meta[key] = value2.upper().replace('-', '')
                     elif key == 'tag':
                         meta[key] = f"-{value2}"
                     elif key == 'screens':
@@ -121,7 +119,7 @@ class Args():
                             parsed = urllib.parse.urlparse(value2)
                             try:
                                 meta['ptp'] = urllib.parse.parse_qs(parsed.query)['torrentid'][0]
-                            except:
+                            except Exception:
                                 console.print('[red]Your terminal ate  part of the url, please surround in quotes next time, or pass only the torrentid')
                                 console.print('[red]Continuing without -ptp')
                         else:
@@ -134,7 +132,7 @@ class Args():
                                 if blupath.endswith('/'):
                                     blupath = blupath[:-1]
                                 meta['blu'] = blupath.split('/')[-1]
-                            except:
+                            except Exception:
                                 console.print('[red]Unable to parse id from url')
                                 console.print('[red]Continuing without --blu')
                         else:
@@ -144,7 +142,7 @@ class Args():
                             parsed = urllib.parse.urlparse(value2)
                             try:
                                 meta['hdb'] = urllib.parse.parse_qs(parsed.query)['id'][0]
-                            except:
+                            except Exception:
                                 console.print('[red]Your terminal ate  part of the url, please surround in quotes next time, or pass only the torrentid')
                                 console.print('[red]Continuing without -hdb')
                         else:
@@ -168,16 +166,14 @@ class Args():
                 # parser.print_help()
         return meta, parser, before_args
 
-
     def list_to_string(self, list):
         if len(list) == 1:
             return str(list[0])
         try:
             result = " ".join(list)
-        except:
+        except Exception:
             result = "None"
         return result
-
 
     def parse_tmdb_id(self, id, category):
         id = id.lower().lstrip()

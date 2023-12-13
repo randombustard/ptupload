@@ -12,6 +12,7 @@ import distutils.util
 from pathlib import Path
 from src.trackers.COMMON import COMMON
 
+
 class MTV():
     """
     Edit for Tracker:
@@ -29,10 +30,10 @@ class MTV():
         self.forum_link = 'https://www.morethantv.me/wiki.php?action=article&id=73'
         self.search_url = 'https://www.morethantv.me/api/torznab'
         self.banned_groups = [
-            '3LTON', 'mRS', 'CM8', 'BRrip', 'Leffe', 'aXXo', 'FRDS', 'XS', 'KiNGDOM', 'WAF', 'nHD', 
+            '3LTON', 'mRS', 'CM8', 'BRrip', 'Leffe', 'aXXo', 'FRDS', 'XS', 'KiNGDOM', 'WAF', 'nHD',
             'h65', 'CrEwSaDe', 'TM', 'ViSiON', 'x0r', 'PandaRG', 'HD2DVD', 'iPlanet', 'JIVE', 'ELiTE',
-            'nikt0', 'STUTTERSHIT', 'ION10', 'RARBG', 'FaNGDiNG0', 'YIFY', 'FUM', 'ViSION', 'NhaNc3', 
-            'nSD', 'PRODJi', 'DNL', 'DeadFish', 'HDTime', 'mHD', 'TERMiNAL', 
+            'nikt0', 'STUTTERSHIT', 'ION10', 'RARBG', 'FaNGDiNG0', 'YIFY', 'FUM', 'ViSION', 'NhaNc3',
+            'nSD', 'PRODJi', 'DNL', 'DeadFish', 'HDTime', 'mHD', 'TERMiNAL',
             '[Oj]', 'QxR', 'ZmN', 'RDN', 'mSD', 'LOAD', 'BDP', 'SANTi', 'ZKBL', ['EVO', 'WEB-DL Only']
         ]
         pass
@@ -42,7 +43,7 @@ class MTV():
         cookiefile = os.path.abspath(f"{meta['base_dir']}/data/cookies/MTV.pkl")
 
         torrent_filename = "BASE"
-        if not Torrent.read(f"{meta['base_dir']}/tmp/{meta['uuid']}/BASE.torrent").piece_size <= 8388608: 
+        if not Torrent.read(f"{meta['base_dir']}/tmp/{meta['uuid']}/BASE.torrent").piece_size <= 8388608:
             console.print("[red]Piece size is OVER 8M and does not work on MTV. Generating a new .torrent")
             from src.prep import Prep
             prep = Prep(screens=meta['screens'], img_host=meta['imghost'], config=self.config)
@@ -50,7 +51,7 @@ class MTV():
             torrent_filename = "MTV"
             # Hash to f"{meta['base_dir']}/tmp/{meta['uuid']}/[{self.tracker}]{meta['clean_name']}.torrent"
         await common.edit_torrent(meta, self.tracker, self.source_flag, torrent_filename=torrent_filename)
-   
+
         # getting category HD Episode, HD Movies, SD Season, HD Season, SD Episode, SD Movies
         cat_id = await self.get_cat_id(meta)
         # res 480 720 1080 1440 2160 4k 6k Other
@@ -69,11 +70,11 @@ class MTV():
         # getting description
         await self.edit_desc(meta)
         # getting groups des so things like imdb link, tmdb link etc..
-        group_desc = await self.edit_group_desc(meta)
-        #poster is optional so no longer getting it as its a pain with having to use supported image provider
+        # group_desc = await self.edit_group_desc(meta)
+        # poster is optional so no longer getting it as its a pain with having to use supported image provider
         # poster = await self.get_poster(meta)
-        
-        #edit name to match MTV standards
+
+        # edit name to match MTV standards
         mtv_name = await self.edit_name(meta)
 
         # anon
@@ -88,7 +89,7 @@ class MTV():
             tfile = f.read()
             f.close()
 
-        ## todo need to check the torrent and make sure its not more than 8MB
+        # # todo need to check the torrent and make sure its not more than 8MB
 
         # need to pass the name of the file along with the torrent
         files = {
@@ -105,7 +106,7 @@ class MTV():
             'origin': origin_id,
             'taglist': des_tags,
             'desc': desc,
-            'groupDesc': group_desc,
+            # 'groupDesc': group_desc,
             'ignoredupes': '1',
             'genre_tags': '---',
             'autocomplete_toggle': 'on',
@@ -160,7 +161,6 @@ class MTV():
             console.print(data)
         return
 
-
     async def edit_desc(self, meta):
         base = open(f"{meta['base_dir']}/tmp/{meta['uuid']}/DESCRIPTION.txt", 'r').read()
         with open(f"{meta['base_dir']}/tmp/{meta['uuid']}/[{self.tracker}]DESCRIPTION.txt", 'w') as desc:
@@ -189,7 +189,7 @@ class MTV():
 
     async def edit_group_desc(self, meta):
         description = ""
-        if meta['imdb_id'] not in ("0", "", None): 
+        if meta['imdb_id'] not in ("0", "", None):
             description += f"https://www.imdb.com/title/tt{meta['imdb_id']}"
         if meta['tmdb'] != 0:
             description += f"\nhttps://www.themoviedb.org/{str(meta['category'].lower())}/{str(meta['tmdb'])}"
@@ -201,7 +201,6 @@ class MTV():
             description += f"\nhttps://myanimelist.net/anime/{str(meta['mal_id'])}"
 
         return description
-
 
     async def edit_name(self, meta):
         mtv_name = meta['uuid']
@@ -226,7 +225,6 @@ class MTV():
         mtv_name = re.sub("[^0-9a-zA-ZÀ-ÿ. &+'\-\[\]]+", "", mtv_name)
         mtv_name = mtv_name.replace(' ', '.').replace('..', '.')
         return mtv_name
-    
 
     # Not needed as its optional
     # async def get_poster(self, meta):
@@ -270,18 +268,18 @@ class MTV():
 
     async def get_res_id(self, resolution):
         resolution_id = {
-            '8640p':'0',
+            '8640p': '0',
             '4320p': '4000',
             '2160p': '2160',
-            '1440p' : '1440',
+            '1440p': '1440',
             '1080p': '1080',
-            '1080i':'1080',
+            '1080i': '1080',
             '720p': '720',
             '576p': '0',
             '576i': '0',
             '480p': '480',
             '480i': '480'
-            }.get(resolution, '10')
+        }.get(resolution, '10')
         return resolution_id
 
     async def get_cat_id(self, meta):
@@ -301,7 +299,6 @@ class MTV():
                     return 4
                 else:
                     return 3
-
 
     async def get_source_id(self, meta):
         if meta['is_disc'] == 'DVD':
@@ -326,7 +323,6 @@ class MTV():
                 }.get(meta['type'], '0')
         return type_id
 
-
     async def get_origin_id(self, meta):
         if meta['personalrelease']:
             return '4'
@@ -335,7 +331,6 @@ class MTV():
         # returning P2P
         else:
             return '3'
-
 
     async def get_tags(self, meta):
         tags = []
@@ -351,13 +346,11 @@ class MTV():
             tags.append('hd')
         # Streaming Service
         if str(meta['service_longname']) != "":
-            tags.append(f"{meta['service_longname'].lower().replace(' ', '.')}.source") 
+            tags.append(f"{meta['service_longname'].lower().replace(' ', '.')}.source")
         # Release Type/Source
         for each in ['remux', 'WEB.DL', 'WEBRip', 'HDTV', 'BluRay', 'DVD', 'HDDVD']:
             if (each.lower().replace('.', '') in meta['type'].lower()) or (each.lower().replace('-', '') in meta['source']):
                 tags.append(each)
-            
-            
         # series tags
         if meta['category'] == "TV":
             if meta.get('tv_pack', 0) == 0:
@@ -372,15 +365,13 @@ class MTV():
                     tags.append('sd.season')
                 else:
                     tags.append('hd.season')
-        
+
         # movie tags
         if meta['category'] == 'MOVIE':
             if meta['sd'] == 1:
                 tags.append('sd.movie')
             else:
                 tags.append('hd.movie')
-        
-
 
         # Audio tags
         audio_tag = ""
@@ -417,8 +408,6 @@ class MTV():
         tags = ' '.join(tags)
         return tags
 
-
-
     async def validate_credentials(self, meta):
         cookiefile = os.path.abspath(f"{meta['base_dir']}/data/cookies/MTV.pkl")
         if not os.path.exists(cookiefile):
@@ -436,14 +425,14 @@ class MTV():
             else:
                 return False
         vapi = await self.validate_api()
-        if vapi != True:
+        if vapi is not True:
             console.print('[red]Failed to validate API. Please confirm that the site is up and your API key is valid.')
         return True
 
     async def validate_api(self):
         url = self.search_url
         params = {
-            'apikey' : self.config['TRACKERS'][self.tracker]['api_key'].strip(),
+            'apikey': self.config['TRACKERS'][self.tracker]['api_key'].strip(),
         }
         try:
             r = requests.get(url, params=params)
@@ -452,7 +441,7 @@ class MTV():
                     console.print("[red]Invalid API Key")
                 return False
             return True
-        except:
+        except Exception:
             return False
 
     async def validate_cookies(self, meta, cookiefile):
@@ -487,13 +476,13 @@ class MTV():
         with requests.Session() as session:
             url = 'https://www.morethantv.me/login'
             payload = {
-                'username' : self.config['TRACKERS'][self.tracker].get('username'),
-                'password' : self.config['TRACKERS'][self.tracker].get('password'),
-                'keeploggedin' : 1,
-                'cinfo' : '1920|1080|24|0',
-                'submit' : 'login',
-                'iplocked' : 1,
-                # 'ssl' : 'yes'
+                'username': self.config['TRACKERS'][self.tracker].get('username'),
+                'password': self.config['TRACKERS'][self.tracker].get('password'),
+                'keeploggedin': 1,
+                'cinfo': '1920|1080|24|0',
+                'submit': 'login',
+                'iplocked': 1,
+                # 'ssl': 'yes'
             }
             res = session.get(url="https://www.morethantv.me/login")
             token = res.text.rsplit('name="token" value="', 1)[1][:48]
@@ -509,11 +498,11 @@ class MTV():
                     mfa_code = pyotp.parse_uri(otp_uri).now()
                 else:
                     mfa_code = console.input('[yellow]MTV 2FA Code: ')
-                    
+
                 two_factor_payload = {
-                    'token' : resp.text.rsplit('name="token" value="', 1)[1][:48],
-                    'code' : mfa_code,
-                    'submit' : 'login'
+                    'token': resp.text.rsplit('name="token" value="', 1)[1][:48],
+                    'code': mfa_code,
+                    'submit': 'login'
                 }
                 resp = session.post(url="https://www.morethantv.me/twofactor/login", data=two_factor_payload)
             # checking if logged in
@@ -531,9 +520,9 @@ class MTV():
         dupes = []
         console.print("[yellow]Searching for existing torrents on site...")
         params = {
-            't' : 'search',
-            'apikey' : self.config['TRACKERS'][self.tracker]['api_key'].strip(),
-            'q' : ""
+            't': 'search',
+            'apikey': self.config['TRACKERS'][self.tracker]['api_key'].strip(),
+            'q': ""
         }
         if meta['imdb_id'] not in ("0", "", None):
             params['imdbid'] = "tt" + meta['imdb_id']
@@ -558,7 +547,7 @@ class MTV():
                     await asyncio.sleep(5)
                 else:
                     console.print(f"[red]Site Seems to be down or not responding to API")
-        except:
+        except Exception:
             console.print(f"[red]Unable to search for existing torrents on site. Most likely the site is down.")
             dupes.append("FAILED SEARCH")
             print(traceback.print_exc())

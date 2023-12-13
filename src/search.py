@@ -3,6 +3,7 @@ import asyncio
 import os
 from src.console import console
 
+
 class Search():
     """
     Logic for searching
@@ -70,13 +71,13 @@ class Search():
                             folders_total_search.append(root+'\\'+name)
                         else:
                             folders_total_search.append(root+'/'+name)
-            
+
             return folders_total_search
         config_dir = self.config['DISCORD']['search_dir']
         if isinstance(config_dir, list):
             for each in config_dir:
                 folders = await search_dir(each)
-                
+
                 folders_total = folders_total + folders
         else:
             folders_total = await search_dir(config_dir)
