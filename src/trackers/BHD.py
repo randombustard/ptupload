@@ -24,7 +24,7 @@ class BHD():
         self.tracker = 'BHD'
         self.source_flag = 'BHD'
         self.upload_url = 'https://beyond-hd.me/api/upload/'
-        self.signature = "Created by Upload Assistant"
+        self.signature = "\n[center]Created using Upload Assistant[/center]"
         self.banned_groups = ['Sicario', 'TOMMY', 'x0r', 'nikt0', 'FGT', 'd3g', 'MeGusta', 'YIFY', 'tigole', 'TEKNO3D', 'C4K', 'RARBG', '4K4U', 'EASports', 'ReaLHD']
         pass
 
@@ -207,7 +207,7 @@ class BHD():
                 for each in range(len(images[:int(meta['screens'])])):
                     web_url = images[each]['web_url']
                     img_url = images[each]['img_url']
-                    desc.write(f"[url={web_url}][img=350x350]]{img_url}[/img][/url]")
+                    desc.write(f"[url={web_url}][img=350x350]{img_url}[/img][/url]")
                 desc.write("[/center]")
             desc.write(self.signature)
             desc.close()
